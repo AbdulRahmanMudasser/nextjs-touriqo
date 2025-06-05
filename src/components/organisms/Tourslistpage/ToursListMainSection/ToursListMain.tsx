@@ -3,6 +3,7 @@ import { FilterSidebar } from '../../../molecules/ToursListPage/ToursListMainSec
 import { TourListSection } from '../../../molecules/ToursListPage/ToursListMainSection/TourListSection';
 import Min from "../../../atoms/rabbit/list"
 import TravelCard from "../../../atoms/rabbit/travelCard"
+
 export const ToursListMain = () => {
   return (
 
@@ -11,8 +12,8 @@ export const ToursListMain = () => {
 
         <div className="lg:w-1/3">
           <FilterSidebar />
-         <Min/>
-         <TravelCard/>
+          <Min />
+          <TravelCard />
         </div>
 
         <div className="lg:w-2/3">
