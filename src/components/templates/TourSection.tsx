@@ -142,9 +142,8 @@ const TourSection = () => {
         </button>
       </div>
       <div
-        className={`grid gap-4 ${
-          isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-4"
-        }`}
+        className={`grid gap-4 ${isMobile ? "grid-cols-1" : isTablet ? "grid-cols-2" : "grid-cols-4"
+          }`}
       >
         {tours.map((tour, index) => (
           <TourCard key={index} tour={tour} />

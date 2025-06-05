@@ -18,7 +18,7 @@ const getLowestPrice = (rooms) => {
 const reverseGeocode = async (latitude, longitude) => {
   const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
   const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
-  
+
   try {
     const response = await fetch(url, { cache: "force-cache" });
     if (!response.ok) {
@@ -101,7 +101,7 @@ export const TourListSection = ({ tours, loading }) => {
     const validateImages = async () => {
       const validatedImages = {};
       for (const tour of tours) {
-        let imageUrl = "/images/destination-bali.jpg";
+        let imageUrl = "/images/tour.jpeg";
         if (tour.images && tour.images.length > 0) {
           const rawUrl = tour.images[0];
           const formattedUrl = rawUrl.includes("{size}") ? rawUrl.replace("{size}", "320x200") : rawUrl;
@@ -120,18 +120,24 @@ export const TourListSection = ({ tours, loading }) => {
     }
   }, [tours]);
 
+  // location: tourLocations[tour.id] || "Unknown Location",
+
   // Map API data to expected tour format with dummy data
   const mappedTours = tours.map((tour) => ({
-    title: tour.name || "Unnamed Hotel",
-    image: imageUrls[tour.id] || "/default-hotel.jpg",
+    id: tour.id ?? "unknown",
+    title: tour.name ?? "Unnamed Hotel",
+    description: tour.description ?? 'None',
+    image: imageUrls[tour.id] ?? "/default-hotel.jpg",
     rating: parseInt(tour.stars) || 3,
-    location: tourLocations[tour.id] || "Unknown Location",
+    location:
+      (tour.latitude && tour.longitude)
+        ? `Latitude ${tour.latitude}, Longitude ${tour.longitude}`
+        : "Unknown Location",
     price: getLowestPrice(tour.rooms),
-    duration: tour.duration || "3 Days",
-    groupSize: tour.groupSize || "Up to 10",
-    discount: tour.discount || null,
-    photoCount: tour.images ? tour.images.length : 5,
-    href: `/hotel/${tour.id || "unknown"}`,
+    duration: tour.duration ?? "3 Days",
+    groupSize: tour.groupSize ?? "Up to 10",
+    discount: tour.discount ?? null,
+    photoCount: tour.images?.length ?? 5,
   }));
 
   const sortedTours = [...mappedTours].sort((a, b) => {
@@ -229,7 +235,19 @@ export const TourListSection = ({ tours, loading }) => {
                   </div>
                 </div>
                 <Link
-                  href={tour.href}
+                  href={{
+                    pathname: "/dynamic",
+                    query: {
+                      id: tour.id,
+                      title: tour.title,
+                      location: tour.location,
+                      price: tour.price,
+                      duration: tour.duration,
+                      rating: tour.rating,
+                      photoCount: tour.photoCount,
+                      discount: tour.discount || "",
+                    },
+                  }}
                   className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font-semibold py-3 px-6 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
                   aria-label={`View details for ${tour.title}`}
                 >
