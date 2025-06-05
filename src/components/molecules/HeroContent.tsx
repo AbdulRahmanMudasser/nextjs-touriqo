@@ -94,10 +94,10 @@ export default function HeroContent() {
   return (
     <div style={{ textAlign: "center", width: "100%", maxWidth: "1280px", padding: "0 16px", marginTop: "60px" }}>
       <h1 style={{ fontSize: "2.5rem", fontWeight: 700, color: "#1E2A44", ...montserratFont }}>
-        Find Your Perfect Tour
+        Find Your Perfect Hotel
       </h1>
       <p style={{ fontSize: "1.25rem", color: "#6B7280", marginTop: "8px", ...montserratFont }}>
-        Explore the world with our curated tours and adventures.
+        Explore the world with our curated hotel selections.
       </p>
       <form onSubmit={(e) => e.preventDefault()} style={{ marginTop: "24px", width: "100%" }}>
         <div className="flex flex-col sm:flex-row gap-3 bg-[#F7F9FF] rounded-lg p-3 shadow-md">
