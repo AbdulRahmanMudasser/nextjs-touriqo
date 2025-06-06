@@ -251,7 +251,7 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
                 </div>
                 <Link
                   href={{
-                    pathname: "/dynamic",
+                    pathname: "/hotel",
                     query: {
                       id: tour.id,
                       title: tour.title,
