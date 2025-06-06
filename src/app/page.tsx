@@ -12,6 +12,7 @@ import { TourSection } from '../components/organisms/Homepage/TourSection/TourSe
 import { AdventureSection } from '../components/organisms/Homepage/AdventureSection/AdventureSection';
 import Topbar from '@/components/molecules/Topbar';
 import '../components/atoms/Homepage/Homepage.css';
+
 export default function Home() {
     return (
         <>

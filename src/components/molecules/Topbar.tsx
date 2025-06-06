@@ -82,9 +82,8 @@ export default function Topbar() {
 
             {/* Menu Content */}
             <div
-              className={`${
-                isMobileMenuOpen ? 'flex' : 'hidden'
-              } sm:flex flex-col sm:flex-row items-center gap-4 fixed sm:relative inset-0 sm:inset-auto bg-[#1E2A44] sm:bg-transparent p-4 sm:p-0 mt-16 sm:mt-0 z-40 h-full sm:h-auto`}
+              className={`${isMobileMenuOpen ? 'flex' : 'hidden'
+                } sm:flex flex-col sm:flex-row items-center gap-4 fixed sm:relative inset-0 sm:inset-auto bg-[#1E2A44] sm:bg-transparent p-4 sm:p-0 mt-16 sm:mt-0 z-40 h-full sm:h-auto`}
             >
               {/* Links */}
               <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-4">

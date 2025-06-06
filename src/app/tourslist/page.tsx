@@ -173,7 +173,7 @@ export default function ToursList() {
           </p>
           <button
             onClick={handleReload}
-            className="bg-[#A3BFFA] hover:bg-[#8aa9ff] text-white font py-2 px-4 rounded-lg flex items-center justify-center mx-auto gap-2 text-sm transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="bg-[#A3BFFA] hover:bg-[#8aa9ff] text-white font py-2 px-4 rounded-lg flex items-center justify-center mx-auto gap-2 text-sm transition disabled:bg-gray-300 disabled:cursor-not-allowed leading-tight"
             aria-label="Retry fetching tours"
           >
             <RefreshCw className="h-4 w-4" />

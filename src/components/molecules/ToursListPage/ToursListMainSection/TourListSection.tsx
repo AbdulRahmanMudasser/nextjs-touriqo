@@ -264,7 +264,7 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
                       description: tour.description,
                     },
                   }}
-                  className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font-semibold py-3 px-6 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
+                  className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font py-2 px-5 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
                   aria-label={`View details for ${tour.title}`}
                 >
                   VIEW DETAILS
