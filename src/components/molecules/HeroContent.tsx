@@ -1,19 +1,19 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function HeroContent() {
-  const [isDateFromDropdownOpen, setIsDateFromDropdownOpen] = useState(false);
-  const [isDateToDropdownOpen, setIsDateToDropdownOpen] = useState(false);
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
   const [guests, setGuests] = useState({ children: 0, adult: 0 });
-  const [selectedDateFrom, setSelectedDateFrom] = useState(null);
-  const [selectedDateTo, setSelectedDateTo] = useState(null);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null);
+  const [selectedDateTo, setSelectedDateTo] = useState<Date | null>(null);
   const [selectedCity, setSelectedCity] = useState("");
 
-  const dateFromDropdownRef = useRef(null);
-  const dateToDropdownRef = useRef(null);
-  const guestsDropdownRef = useRef(null);
+  const dateFromPickerRef = useRef<HTMLDivElement>(null);
+  const dateToPickerRef = useRef<HTMLDivElement>(null);
+  const guestsDropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const totalGuests = guests.children + guests.adult;
@@ -34,38 +34,37 @@ export default function HeroContent() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      const isOutside = (ref) => ref.current && !ref.current.contains(event.target);
-      if (isOutside(dateFromDropdownRef)) setIsDateFromDropdownOpen(false);
-      if (isOutside(dateToDropdownRef)) setIsDateToDropdownOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      const isOutside = (ref: React.RefObject<HTMLElement>) =>
+        ref.current && !ref.current.contains(event.target as Node);
+      if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
+      if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleGuestChange = (category, increment) => {
+  // Clear "Date To" if "Date From" changes to a later date
+  useEffect(() => {
+    if (selectedDateFrom && selectedDateTo && selectedDateTo < selectedDateFrom) {
+      setSelectedDateTo(null);
+    }
+  }, [selectedDateFrom, selectedDateTo]);
+
+  const handleGuestChange = (category: "children" | "adult", increment: boolean) => {
     setGuests((prev) => ({
       ...prev,
       [category]: Math.max(0, prev[category] + (increment ? 1 : -1)),
     }));
   };
 
-  const handleDateFromSelect = (date) => {
-    setSelectedDateFrom(`June ${date}, 2025`);
-    setIsDateFromDropdownOpen(false);
-  };
-
-  const handleDateToSelect = (date) => {
-    setSelectedDateTo(`June ${date}, 2025`);
-    setIsDateToDropdownOpen(false);
-  };
-
-  const formatDateToApi = (dateString) => {
-    if (!dateString) return null;
-    const [month, day, year] = dateString.split(" ");
-    const months = { June: "06" };
-    return `${year}-${months[month]}-${day.replace(",", "").padStart(2, "0")}`;
+  const formatDateToApi = (date: Date | null) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const handleSearch = () => {
@@ -81,8 +80,8 @@ export default function HeroContent() {
 
     const queryParams = new URLSearchParams({
       city: selectedCity,
-      checkin: formatDateToApi(selectedDateFrom),
-      checkout: formatDateToApi(selectedDateTo),
+      checkin: formatDateToApi(selectedDateFrom)!,
+      checkout: formatDateToApi(selectedDateTo)!,
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
@@ -126,113 +125,42 @@ export default function HeroContent() {
               ))}
             </select>
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateFromDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDateFromDropdownOpen(!isDateFromDropdownOpen)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                textAlign: "left",
-                fontSize: "1rem",
-                color: selectedDateFrom ? "#1E2A44" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                ...montserratFont,
-              }}
-            >
-              {icons.calendar}
-              {selectedDateFrom || "Check-in Date"}
-            </button>
-            {isDateFromDropdownOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "8px",
-                  marginTop: "4px",
-                  zIndex: 10,
-                  padding: "8px",
-                }}
-              >
-                {[10, 11, 12, 13, 14].map((date) => (
-                  <div
-                    key={date}
-                    onClick={() => handleDateFromSelect(date)}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      ...montserratFont,
-                      ":hover": { backgroundColor: "#F3F4F6" },
-                    }}
-                  >
-                    June {date}, 2025
-                  </div>
-                ))}
-              </div>
-            )}
+          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateFromPickerRef}>
+            <div style={{ position: "relative" }}>
+              <DatePicker
+                selected={selectedDateFrom}
+                onChange={(date: Date | null) => setSelectedDateFrom(date)}
+                placeholderText="Check-in Date"
+                dateFormat="MMMM d, yyyy"
+                minDate={new Date()}
+                className="w-full p-3 rounded-lg border border-[#D1D5DB] bg-white text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition"
+                style={montserratFont}
+                wrapperClassName="w-full"
+                popperClassName="z-10"
+              />
+              <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }}>
+                {icons.calendar}
+              </span>
+            </div>
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateToDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDateToDropdownOpen(!isDateToDropdownOpen)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                textAlign: "left",
-                fontSize: "1rem",
-                color: selectedDateTo ? "#1E2A44" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                ...montserratFont,
-              }}
-            >
-              {icons.calendar}
-              {selectedDateTo || "Check-out Date"}
-            </button>
-            {isDateToDropdownOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "8px",
-                  marginTop: "4px",
-                  zIndex: 10,
-                  padding: "8px",
-                }}
-              >
-                {[15, 16, 17, 18, 19].map((date) => (
-                  <div
-                    key={date}
-                    onClick={() => handleDateToSelect(date)}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      ...montserratFont,
-                      ":hover": { backgroundColor: "#F3F4F6" },
-                    }}
-                  >
-                    June {date}, 2025
-                  </div>
-                ))}
-              </div>
-            )}
+          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateToPickerRef}>
+            <div style={{ position: "relative" }}>
+              <DatePicker
+                selected={selectedDateTo}
+                onChange={(date: Date | null) => setSelectedDateTo(date)}
+                placeholderText="Check-out Date"
+                dateFormat="MMMM d, yyyy"
+                minDate={selectedDateFrom || new Date()}
+                className="w-full p-3 rounded-lg border border-[#D1D5DB] bg-white text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition"
+                style={montserratFont}
+                wrapperClassName="w-full"
+                popperClassName="z-10"
+                disabled={!selectedDateFrom}
+              />
+              <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)" }}>
+                {icons.calendar}
+              </span>
+            </div>
           </div>
           <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={guestsDropdownRef}>
             <button
@@ -278,14 +206,14 @@ export default function HeroContent() {
                     </span>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <button
-                        onClick={() => handleGuestChange(category, false)}
+                        onClick={() => handleGuestChange(category as "adult" | "children", false)}
                         style={{ padding: "4px 8px", border: "1px solid #D1D5DB", borderRadius: "4px" }}
                       >
                         -
                       </button>
                       <span>{guests[category]}</span>
                       <button
-                        onClick={() => handleGuestChange(category, true)}
+                        onClick={() => handleGuestChange(category as "adult" | "children", true)}
                         style={{ padding: "4px 8px", border: "1px solid #D1D5DB", borderRadius: "4px" }}
                       >
                         +
