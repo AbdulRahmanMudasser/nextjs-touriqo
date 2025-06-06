@@ -16,6 +16,7 @@ import TourComments from "../Components/tourComment";
 interface TourData {
   id: string;
   title: string;
+  description: string;
   location: string;
   price: string;
   duration: string;
@@ -31,6 +32,7 @@ export default function TourDetailPage() {
   const tourData: TourData = {
     id: searchParams.get("id") || "unknown",
     title: searchParams.get("title") || "Unnamed Hotel",
+    description: searchParams.get("description") || "None",
     location: searchParams.get("location") || "Unknown Location",
     price: searchParams.get("price") || "$199.99",
     duration: searchParams.get("duration") || "3 Days",
@@ -54,7 +56,10 @@ export default function TourDetailPage() {
         photoCount={tourData.photoCount}
         discount={tourData.discount}
       />
-      <TourBooking />
+      <TourBooking
+        id={tourData.id}
+        description={tourData.description}
+      />
       <TourInformation />
       <TourPlan />
       <Map />
