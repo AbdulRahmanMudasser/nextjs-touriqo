@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Calendar, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 interface BookingFormProps {
   id: string;

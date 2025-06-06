@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar, Search, User } from "lucide-react";
 
-export default function CheckoutForm() {
+export default function HeroContent() {
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
   const [guests, setGuests] = useState({ children: 0, adult: 0 });
   const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null);
@@ -28,15 +28,15 @@ export default function CheckoutForm() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const isOutside = (ref: React.RefObject<HTMLElement>) =>
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const isOutside = (ref: React.RefObject<HTMLElement | null>) =>
         ref.current && !ref.current.contains(event.target as Node);
       if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
       if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside); // Support touch devices
+    document.addEventListener("touchstart", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
@@ -50,7 +50,10 @@ export default function CheckoutForm() {
     }
   }, [selectedDateFrom, selectedDateTo]);
 
-  const handleGuestChange = (category: "children" | "adult", increment: boolean) => {
+  const handleGuestChange = (
+    category: keyof typeof guests,
+    increment: boolean,
+  ) => {
     setGuests((prev) => ({
       ...prev,
       [category]: Math.max(0, prev[category] + (increment ? 1 : -1)),
@@ -158,21 +161,23 @@ export default function CheckoutForm() {
             </button>
             {isGuestsDropdownOpen && (
               <div className="absolute top-full left-0 w-full bg-white border border-[#D1D5DB] rounded-lg mt-1 z-10 p-2 shadow-lg">
-                {["adult", "children"].map((category) => (
+                {(["adult", "children"] as const).map((category) => (
                   <div key={category} className="flex justify-between items-center p-2">
                     <span className="text-sm sm:text-base capitalize">
                       {category}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleGuestChange(category as "adult" | "children", false)}
+                        type="button"
+                        onClick={() => handleGuestChange(category, false)}
                         className="p-1 border border-[#D1D5DB] rounded text-sm hover:bg-gray-100"
                       >
                         -
                       </button>
                       <span className="text-sm sm:text-base">{guests[category]}</span>
                       <button
-                        onClick={() => handleGuestChange(category as "adult" | "children", true)}
+                        type="button"
+                        onClick={() => handleGuestChange(category, true)}
                         className="p-1 border border-[#D1D5DB] rounded text-sm hover:bg-gray-100"
                       >
                         +
@@ -185,6 +190,7 @@ export default function CheckoutForm() {
           </div>
           <div className="flex-1 w-full">
             <button
+              type="button"
               onClick={handleSearch}
               className="w-full p-2 sm:p-3 bg-[#D6DAFF] text-[#1E2A44] rounded-lg font-semibold text-sm sm:text-base uppercase flex items-center justify-center gap-2 hover:bg-[#C4C8FF] transition"
             >
