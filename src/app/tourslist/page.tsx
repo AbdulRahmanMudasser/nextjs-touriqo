@@ -58,7 +58,7 @@ export default function ToursList() {
       return;
     }
 
-    const coordinates = cityCoordinates[city.toLowerCase()];
+    const coordinates = (cityCoordinates as any)[city.toLowerCase()]; // Type assertion for cityCoordinates
     if (!coordinates) {
       console.error("Invalid city selection:", city);
       setError("Invalid city selection.");
@@ -166,19 +166,45 @@ export default function ToursList() {
           </div>
         </div>
       ) : error ? (
-        <div className="max-w-2xl mx-auto p-6 text-center bg-white rounded-xl shadow-lg border border-gray-100 my-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Something Went Wrong</h3>
-          <p className="text-red-600 text-sm mb-4">
-            This could be due to an internet issue or server downtime. Error: {error}
-          </p>
-          <button
-            onClick={handleReload}
-            className="bg-[#A3BFFA] hover:bg-[#8aa9ff] text-white font py-2 px-4 rounded-lg flex items-center justify-center mx-auto gap-2 text-sm transition disabled:bg-gray-300 disabled:cursor-not-allowed leading-tight"
-            aria-label="Retry fetching tours"
-          >
-            <RefreshCw className="h-4 w-4" />
-            TRY AGAIN
-          </button>
+        <div className="max-w-2xl mx-auto p-6 text-center bg-white rounded-xl shadow-lg border border-[#D6DAFF] my-8 transition-all duration-300 ease-in-out">
+          <div className="flex flex-col items-center gap-4">
+            {/* Using a red-ish icon for error, consistent with common UI patterns */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-10 h-10 text-red-500 animate-pulse" // Added animate-pulse for a subtle effect
+              aria-label="Error icon"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.731 0 2.813-1.874 1.948-3.374L13.948 3.374c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+              />
+            </svg>
+
+            <h3 className="text-xl font-bold text-[#1E2A44]">Oops! Something Went Wrong</h3>
+            <p className="text-gray-700 text-base leading-relaxed">
+              We encountered an issue while trying to fetch the tours.
+              <br />
+              Please check your internet connection or try again.
+            </p>
+            {error && (
+              <p className="text-sm text-gray-500 italic mt-2">
+                Details: {error}
+              </p>
+            )}
+            <button
+              onClick={handleReload}
+              className="bg-[#D6DAFF] hover:bg-[#C4C8FF] text-[#1E2A44] font-semibold py-2 px-6 rounded-lg flex items-center justify-center mx-auto gap-2 text-sm transition-all duration-200 ease-in-out disabled:bg-gray-300 disabled:cursor-not-allowed leading-tight group"
+              aria-label="Retry fetching tours"
+            >
+              <RefreshCw className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
+              <span>TRY AGAIN</span>
+            </button>
+          </div>
         </div>
       ) : (
         <ToursListMain tours={tours} loading={loading} city={city} />
