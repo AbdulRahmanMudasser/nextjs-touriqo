@@ -1,19 +1,20 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Calendar, Search, User } from "lucide-react";
 
 export default function HeroContent() {
-  const [isDateFromDropdownOpen, setIsDateFromDropdownOpen] = useState(false);
-  const [isDateToDropdownOpen, setIsDateToDropdownOpen] = useState(false);
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
   const [guests, setGuests] = useState({ children: 0, adult: 0 });
-  const [selectedDateFrom, setSelectedDateFrom] = useState(null);
-  const [selectedDateTo, setSelectedDateTo] = useState(null);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null);
+  const [selectedDateTo, setSelectedDateTo] = useState<Date | null>(null);
   const [selectedCity, setSelectedCity] = useState("");
 
-  const dateFromDropdownRef = useRef(null);
-  const dateToDropdownRef = useRef(null);
-  const guestsDropdownRef = useRef(null);
+  const dateFromPickerRef = useRef<HTMLDivElement>(null);
+  const dateToPickerRef = useRef<HTMLDivElement>(null);
+  const guestsDropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const totalGuests = guests.children + guests.adult;
@@ -26,46 +27,45 @@ export default function HeroContent() {
     europe: { latitude: 54.5260, longitude: 15.2551 },
   };
 
-  const montserratFont = { fontFamily: "Montserrat, sans-serif" };
-  const icons = {
-    search: <span>🔍</span>,
-    calendar: <span>📅</span>,
-    person: <span>👤</span>,
-  };
-
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      const isOutside = (ref) => ref.current && !ref.current.contains(event.target);
-      if (isOutside(dateFromDropdownRef)) setIsDateFromDropdownOpen(false);
-      if (isOutside(dateToDropdownRef)) setIsDateToDropdownOpen(false);
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const isOutside = (ref: React.RefObject<HTMLElement | null>) =>
+        ref.current && !ref.current.contains(event.target as Node);
+      if (isOutside(dateFromPickerRef)) setSelectedDateFrom((prev) => prev);
+      if (isOutside(dateToPickerRef)) setSelectedDateTo((prev) => prev);
       if (isOutside(guestsDropdownRef)) setIsGuestsDropdownOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
-  const handleGuestChange = (category, increment) => {
+  // Clear "Date To" if "Date From" changes to a later date
+  useEffect(() => {
+    if (selectedDateFrom && selectedDateTo && selectedDateTo < selectedDateFrom) {
+      setSelectedDateTo(null);
+    }
+  }, [selectedDateFrom, selectedDateTo]);
+
+  const handleGuestChange = (
+    category: keyof typeof guests,
+    increment: boolean,
+  ) => {
     setGuests((prev) => ({
       ...prev,
       [category]: Math.max(0, prev[category] + (increment ? 1 : -1)),
     }));
   };
 
-  const handleDateFromSelect = (date) => {
-    setSelectedDateFrom(`June ${date}, 2025`);
-    setIsDateFromDropdownOpen(false);
-  };
-
-  const handleDateToSelect = (date) => {
-    setSelectedDateTo(`June ${date}, 2025`);
-    setIsDateToDropdownOpen(false);
-  };
-
-  const formatDateToApi = (dateString) => {
-    if (!dateString) return null;
-    const [month, day, year] = dateString.split(" ");
-    const months = { June: "06" };
-    return `${year}-${months[month]}-${day.replace(",", "").padStart(2, "0")}`;
+  const formatDateToApi = (date: Date | null) => {
+    if (!date) return null;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   const handleSearch = () => {
@@ -81,8 +81,8 @@ export default function HeroContent() {
 
     const queryParams = new URLSearchParams({
       city: selectedCity,
-      checkin: formatDateToApi(selectedDateFrom),
-      checkout: formatDateToApi(selectedDateTo),
+      checkin: formatDateToApi(selectedDateFrom)!,
+      checkout: formatDateToApi(selectedDateTo)!,
       adults: String(guests.adult),
       children: String(guests.children),
     }).toString();
@@ -92,29 +92,20 @@ export default function HeroContent() {
   };
 
   return (
-    <div style={{ textAlign: "center", width: "100%", maxWidth: "1280px", padding: "0 16px", marginTop: "60px" }}>
-      <h1 style={{ fontSize: "2.5rem", fontWeight: 700, color: "#1E2A44", ...montserratFont }}>
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 text-center mt-2 sm:mt-4 font-montserrat">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
         Find Your Perfect Hotel
       </h1>
-      <p style={{ fontSize: "1.25rem", color: "#6B7280", marginTop: "8px", ...montserratFont }}>
-        Explore the world with our curated hotel selections.
+      <p className="text-sm sm:text-base md:text-lg text-white mt-2">
+        Explore the world with our curated hotel selections
       </p>
-      <form onSubmit={(e) => e.preventDefault()} style={{ marginTop: "24px", width: "100%" }}>
-        <div className="flex flex-col sm:flex-row gap-3 bg-[#F7F9FF] rounded-lg p-3 shadow-md">
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }}>
+      <form onSubmit={(e) => e.preventDefault()} className="mt-6 sm:mt-8 w-full">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 bg-[#F7F9FF] rounded-lg p-2 sm:p-3 shadow-md">
+          <div className="flex-1 w-full relative">
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                fontSize: "1rem",
-                color: selectedCity ? "#1E2A44" : "#9CA3AF",
-                ...montserratFont,
-              }}
+              className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition"
             >
               <option value="" disabled>
                 Select City
@@ -126,167 +117,68 @@ export default function HeroContent() {
               ))}
             </select>
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateFromDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDateFromDropdownOpen(!isDateFromDropdownOpen)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                textAlign: "left",
-                fontSize: "1rem",
-                color: selectedDateFrom ? "#1E2A44" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                ...montserratFont,
-              }}
-            >
-              {icons.calendar}
-              {selectedDateFrom || "Check-in Date"}
-            </button>
-            {isDateFromDropdownOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "8px",
-                  marginTop: "4px",
-                  zIndex: 10,
-                  padding: "8px",
-                }}
-              >
-                {[10, 11, 12, 13, 14].map((date) => (
-                  <div
-                    key={date}
-                    onClick={() => handleDateFromSelect(date)}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      ...montserratFont,
-                      ":hover": { backgroundColor: "#F3F4F6" },
-                    }}
-                  >
-                    June {date}, 2025
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="flex-1 w-full relative" ref={dateFromPickerRef}>
+            <div className="relative">
+              <DatePicker
+                selected={selectedDateFrom}
+                onChange={(date: Date | null) => setSelectedDateFrom(date)}
+                placeholderText="Check-in Date"
+                dateFormat="MMMM d, yyyy"
+                minDate={new Date()}
+                className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition pr-10"
+                wrapperClassName="w-full"
+                popperClassName="z-10 sm:max-w-[300px] w-[90vw] left-0 sm:left-auto"
+              />
+              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-[#9CA3AF]" />
+            </div>
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={dateToDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsDateToDropdownOpen(!isDateToDropdownOpen)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                textAlign: "left",
-                fontSize: "1rem",
-                color: selectedDateTo ? "#1E2A44" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                ...montserratFont,
-              }}
-            >
-              {icons.calendar}
-              {selectedDateTo || "Check-out Date"}
-            </button>
-            {isDateToDropdownOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "8px",
-                  marginTop: "4px",
-                  zIndex: 10,
-                  padding: "8px",
-                }}
-              >
-                {[15, 16, 17, 18, 19].map((date) => (
-                  <div
-                    key={date}
-                    onClick={() => handleDateToSelect(date)}
-                    style={{
-                      padding: "8px",
-                      cursor: "pointer",
-                      ...montserratFont,
-                      ":hover": { backgroundColor: "#F3F4F6" },
-                    }}
-                  >
-                    June {date}, 2025
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="flex-1 w-full relative" ref={dateToPickerRef}>
+            <div className="relative">
+              <DatePicker
+                selected={selectedDateTo}
+                onChange={(date: Date | null) => setSelectedDateTo(date)}
+                placeholderText="Check-out Date"
+                dateFormat="MMMM d, yyyy"
+                minDate={selectedDateFrom || new Date()}
+                className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition pr-10"
+                wrapperClassName="w-full"
+                popperClassName="z-10 sm:max-w-[300px] w-[90vw] left-0 sm:left-auto"
+                disabled={!selectedDateFrom}
+              />
+              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-[#9CA3AF]" />
+            </div>
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%", position: "relative" }} ref={guestsDropdownRef}>
+          <div className="flex-1 w-full relative" ref={guestsDropdownRef}>
             <button
               type="button"
               onClick={() => setIsGuestsDropdownOpen(!isGuestsDropdownOpen)}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #D1D5DB",
-                backgroundColor: "#FFFFFF",
-                textAlign: "left",
-                fontSize: "1rem",
-                color: totalGuests > 0 ? "#1E2A44" : "#9CA3AF",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                ...montserratFont,
-              }}
+              className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-left text-[#1E2A44] flex items-center gap-2 transition hover:bg-gray-50"
             >
-              {icons.person}
-              {totalGuests > 0 ? `${totalGuests} Guest${totalGuests > 1 ? "s" : ""}` : "Guests"}
+              <User className="h-4 w-4 sm:h-5 sm:w-5 text-[#9CA3AF]" />
+              <span className={totalGuests > 0 ? "text-[#1E2A44]" : "text-[#9CA3AF]"}>
+                {totalGuests > 0 ? `${totalGuests} Guest${totalGuests > 1 ? "s" : ""}` : "Guests"}
+              </span>
             </button>
             {isGuestsDropdownOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  width: "100%",
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #D1D5DB",
-                  borderRadius: "8px",
-                  marginTop: "4px",
-                  zIndex: 10,
-                  padding: "8px",
-                }}
-              >
-                {["adult", "children"].map((category) => (
-                  <div key={category} style={{ display: "flex", justifyContent: "space-between", padding: "8px" }}>
-                    <span style={{ ...montserratFont }}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
+              <div className="absolute top-full left-0 w-full bg-white border border-[#D1D5DB] rounded-lg mt-1 z-10 p-2 shadow-lg">
+                {(["adult", "children"] as const).map((category) => (
+                  <div key={category} className="flex justify-between items-center p-2">
+                    <span className="text-sm sm:text-base capitalize">
+                      {category}
                     </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={() => handleGuestChange(category, false)}
-                        style={{ padding: "4px 8px", border: "1px solid #D1D5DB", borderRadius: "4px" }}
+                        className="p-1 border border-[#D1D5DB] rounded text-sm hover:bg-gray-100"
                       >
                         -
                       </button>
-                      <span>{guests[category]}</span>
+                      <span className="text-sm sm:text-base">{guests[category]}</span>
                       <button
+                        type="button"
                         onClick={() => handleGuestChange(category, true)}
-                        style={{ padding: "4px 8px", border: "1px solid #D1D5DB", borderRadius: "4px" }}
+                        className="p-1 border border-[#D1D5DB] rounded text-sm hover:bg-gray-100"
                       >
                         +
                       </button>
@@ -296,28 +188,13 @@ export default function HeroContent() {
               </div>
             )}
           </div>
-          <div style={{ flex: "1 1 auto", width: "100%" }}>
+          <div className="flex-1 w-full">
             <button
+              type="button"
               onClick={handleSearch}
-              style={{
-                width: "100%",
-                padding: "12px 24px",
-                backgroundColor: "#D6DAFF",
-                color: "#1E2A44",
-                borderRadius: "8px",
-                border: "none",
-                textTransform: "uppercase",
-                fontWeight: 600,
-                fontSize: "1rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                whiteSpace: "nowrap",
-                ...montserratFont,
-              }}
+              className="w-full p-2 sm:p-3 bg-[#D6DAFF] text-[#1E2A44] rounded-lg font-semibold text-sm sm:text-base uppercase flex items-center justify-center gap-2 hover:bg-[#C4C8FF] transition"
             >
-              {icons.search}
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
               Search
             </button>
           </div>

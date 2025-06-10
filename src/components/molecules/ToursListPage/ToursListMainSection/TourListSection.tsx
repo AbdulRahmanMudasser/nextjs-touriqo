@@ -33,7 +33,7 @@ const getLowestPrice = (rooms?: { price?: string; rate?: string }[]) => {
 const reverseGeocode = async (latitude: number, longitude: number) => {
   const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
   const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
-  
+
   try {
     const response = await fetch(url, { cache: "force-cache" });
     if (!response.ok) {
@@ -54,8 +54,19 @@ const reverseGeocode = async (latitude: number, longitude: number) => {
 // Helper function to validate image URL
 const isValidImageUrl = async (url: string) => {
   try {
-    const response = await fetch(url, { method: "HEAD", cache: "no-store" });
-    return response.ok && response.headers.get("content-type")?.startsWith("image/");
+    const response = await fetch(url, {
+      method: "GET",
+      cache: "no-store",
+      redirect: "follow",
+    });
+    const contentType = response.headers.get("content-type");
+    const isImage = contentType?.startsWith("image/");
+    if (!response.ok || !isImage) {
+      console.warn(`Invalid image URL: ${url}, status: ${response.status}, content-type: ${contentType}`);
+      return false;
+    }
+    console.log(`Valid image URL: ${url}`);
+    return true;
   } catch (error) {
     console.error(`Image validation failed for ${url}:`, error);
     return false;
@@ -87,6 +98,7 @@ const TourCardSkeleton = () => (
 interface TourListSectionProps {
   tours: Tour[];
   loading: boolean;
+  city?: string;
 }
 
 export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
@@ -97,6 +109,14 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
   const toursPerPage = 6;
   const totalTours = tours.length;
   const totalPages = Math.ceil(totalTours / toursPerPage);
+
+  // Log tours data for debugging
+  useEffect(() => {
+    console.log("Received tours data:", tours);
+    tours.forEach((tour) => {
+      console.log(`Tour name: ${tour.name}, Images: ${JSON.stringify(tour.images)}`);
+    });
+  }, [tours]);
 
   // Fetch locations for tours
   useEffect(() => {
@@ -122,18 +142,25 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
       const validatedImages: { [key: string]: string } = {};
       for (const tour of tours) {
         let imageUrl = "/default-hotel.jpg";
+        console.log(`Processing tour: ${tour.name}, ID: ${tour.id}`);
+
         if (tour.images && tour.images.length > 0) {
           const rawUrl = tour.images[0];
-          const formattedUrl = rawUrl.includes("{size}") ? rawUrl.replace("{size}", "320x200") : rawUrl;
+          const formattedUrl = rawUrl.includes("{size}") ? rawUrl.replace("{size}", "1024x768") : rawUrl;
+          console.log(`Trying tour image for ${tour.name}: ${formattedUrl}`);
           if (await isValidImageUrl(formattedUrl)) {
             imageUrl = formattedUrl;
+            console.log(`Using tour image for ${tour.name}: ${imageUrl}`);
           } else {
-            console.warn(`Invalid image URL for tour ${tour.id}: ${formattedUrl}`);
+            console.warn(`Invalid tour image URL for ${tour.id}: ${formattedUrl}`);
           }
+        } else {
+          console.log(`No tour images available for ${tour.name}, using fallback: ${imageUrl}`);
         }
         validatedImages[tour.id] = imageUrl;
       }
       setImageUrls(validatedImages);
+      console.log("Validated image URLs:", validatedImages);
     };
     if (tours.length) {
       validateImages();
@@ -198,7 +225,7 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
             role="article"
             aria-label={`Hotel: ${tour.title}`}
           >
-            <div className="relative w-full md:w-[320px] h-[200px]">
+            <div className="relative w-full md:w-[320px] h-[280px]">
               <Image
                 src={tour.image}
                 alt={tour.title}
@@ -262,9 +289,10 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
                       photoCount: tour.photoCount,
                       discount: tour.discount,
                       description: tour.description,
+                      image: tour.image, // Add image URL to query
                     },
                   }}
-                  className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font-semibold py-3 px-6 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
+                  className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font py-2 px-5 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
                   aria-label={`View details for ${tour.title}`}
                 >
                   VIEW DETAILS

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { Clock, Heart, MapPin, Share2, ThumbsUp, MessageSquare, Leaf } from "lucide-react";
 
 // Define TypeScript interface for props
@@ -12,9 +13,11 @@ interface TourHeaderProps {
   rating: number;
   photoCount: number;
   discount: string;
+  image: string; // Add image prop
 }
 
 export default function TourHeader({
+  id,
   title = "Unnamed Hotel",
   location = "Unknown Location",
   price = "$199.99",
@@ -22,6 +25,7 @@ export default function TourHeader({
   rating = 3,
   photoCount = 5,
   discount = "",
+  image = "/default-hotel.jpg", // Fallback image
 }: TourHeaderProps) {
   // Convert rating to numbers and ensure valid values
   const numericRating = parseFloat(rating.toString()) || 3;
@@ -31,6 +35,27 @@ export default function TourHeader({
 
   return (
     <div className="font-sans">
+      {/* Image Section */}
+      <div className="relative w-full h-[400px] bg-gray-200">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          className="object-cover"
+          placeholder="blur"
+          blurDataURL="/default-hotel.jpg"
+          onError={(e) => {
+            console.warn(`Failed to load header image for ${title}: ${image}`);
+            e.currentTarget.src = "/default-hotel.jpg";
+          }}
+        />
+        {discount && (
+          <div className="absolute top-4 left-4 bg-orange-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+            {discount}
+          </div>
+        )}
+      </div>
+
       {/* Top Section with Gray Background */}
       <div className="bg-gray-50 py-4 sm:py-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">

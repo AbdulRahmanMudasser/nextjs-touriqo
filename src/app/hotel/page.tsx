@@ -23,6 +23,7 @@ interface TourData {
   rating: number;
   photoCount: number;
   discount: string;
+  image: string; // Add image field
 }
 
 export default function TourDetailPage() {
@@ -39,13 +40,14 @@ export default function TourDetailPage() {
     rating: parseFloat(searchParams.get("rating") || "3") || 3,
     photoCount: parseInt(searchParams.get("photoCount") || "5") || 5,
     discount: searchParams.get("discount") || "",
+    image: searchParams.get("image") || "/default-hotel.jpg", // Fallback image
   };
 
   return (
     <div className="font-sans">
       <h1 className="text-3xl font-bold text-center py-6 text-white bg-black"></h1>
       <Navbar />
-      <Img />
+      <Img /> {/* Assuming this displays a placeholder or gallery; keep it for now */}
       <Header
         id={tourData.id}
         title={tourData.title}
@@ -55,11 +57,9 @@ export default function TourDetailPage() {
         rating={tourData.rating}
         photoCount={tourData.photoCount}
         discount={tourData.discount}
+        image={tourData.image} // Pass image to Header
       />
-      <TourBooking
-        id={tourData.id}
-        description={tourData.description}
-      />
+      <TourBooking id={tourData.id} description={tourData.description} />
       <TourInformation />
       <TourPlan />
       <Map />
