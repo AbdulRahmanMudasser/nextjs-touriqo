@@ -225,7 +225,7 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
             role="article"
             aria-label={`Hotel: ${tour.title}`}
           >
-            <div className="relative w-full md:w-[320px] h-[200px]">
+            <div className="relative w-full md:w-[320px] h-[280px]">
               <Image
                 src={tour.image}
                 alt={tour.title}
@@ -289,6 +289,7 @@ export const TourListSection = ({ tours, loading }: TourListSectionProps) => {
                       photoCount: tour.photoCount,
                       discount: tour.discount,
                       description: tour.description,
+                      image: tour.image, // Add image URL to query
                     },
                   }}
                   className="inline-block bg-gradient-to-r from-[#B0B7FF] to-[#D6DAFF] text-white font py-2 px-5 rounded-xl hover:from-[#A0A7FF] hover:to-[#C6CAFF] transition-all duration-300 text-center"
