@@ -12,27 +12,29 @@ import { TourSection } from '../components/organisms/Homepage/TourSection/TourSe
 import { AdventureSection } from '../components/organisms/Homepage/AdventureSection/AdventureSection';
 import Topbar from '@/components/molecules/Topbar';
 import '../components/atoms/Homepage/Homepage.css';
+
 export default function Home() {
-    return (
-        <>
-            <Topbar />
-            <Navbar />
-            <HeroSection />
-            <BrowseTypes />
-            <AdventuTours />
-            <GowildsSection />
-            <WhoWeAreSection />
-            <WhatWeOfferSection />
-            <div style={{ padding: '48px 0', backgroundColor: '#f8fafc' }}>
-                <QASection />
-            </div>
-            <div style={{ padding: '48px 0', backgroundColor: '#fff' }}>
-                <TourSection /></div>
-            <div style={{ padding: '48px 0', backgroundColor: '#fff' }}>
-                <AdventureSection />
-            </div>
-            <TravelGallerySection />
-            <FooterSection />
-        </>
-    );
+  return (
+    <>
+      <Topbar />
+      <Navbar />
+      <HeroSection />
+      <BrowseTypes />
+      <AdventuTours />
+      <GowildsSection />
+      <WhoWeAreSection />
+      <WhatWeOfferSection />
+      <div className="py-12 bg-gray-50">
+        <QASection />
+      </div>
+      <div className="py-12 bg-white">
+        <TourSection />
+      </div>
+      <div className="py-12 bg-white">
+        <AdventureSection />
+      </div>
+      <TravelGallerySection />
+      <FooterSection />
+    </>
+  );
 }
