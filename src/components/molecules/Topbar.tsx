@@ -9,25 +9,25 @@ export default function Topbar() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
       `}</style>
-      <div className="w-full bg-gradient-to-r from-[#1E2A44] to-[#2A3A66] py-2 shadow-lg overflow-visible">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
+      <div className="w-full max-w-none bg-gradient-to-r from-[#1E2A44] to-[#2A3A66] py-1 shadow-sm overflow-visible">
+        <div className="w-full max-w-[1408px] mx-auto px-2 sm:px-2 md:px-3 lg:px-4 overflow-visible">
+          <div className="flex flex-row flex-nowrap justify-between items-center gap-1 sm:gap-1 md:gap-1.5 lg:gap-2 min-h-fit">
             {/* Contact Info */}
-            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-4 text-[10px] sm:text-sm text-gray-200 font-['Montserrat']">
-              <div className="flex items-center gap-1 group">
-                <FaMapMarkerAlt className="text-indigo-400 group-hover:text-indigo-300 transition-colors duration-200 w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="group-hover:text-white transition-colors duration-200">250 Main Street, USA</span>
+            <div className="flex flex-nowrap justify-start items-center gap-1 sm:gap-1 md:gap-1.5 text-[8px] sm:text-[9px] md:text-[10px] lg:text-[11px] text-gray-200 font-['Montserrat']">
+              <div className="flex items-center gap-0.5 group">
+                <FaMapMarkerAlt className="text-indigo-400 group-hover:text-indigo-300 transition-colors duration-200 w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
+                <span className="group-hover:text-white transition-colors duration-200">250 Main St, USA</span>
               </div>
               <a
                 href="mailto:contact@example.com"
-                className="flex items-center gap-1 group"
+                className="flex items-center gap-0.5 group"
               >
-                <FaEnvelope className="text-indigo-400 group-hover:text-indigo-300 transition-colors duration-200 w-3 h-3 sm:w-4 sm:h-4" />
+                <FaEnvelope className="text-indigo-400 group-hover:text-indigo-300 transition-colors duration-200 w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
                 <span className="group-hover:text-white transition-colors duration-200">contact@example.com</span>
               </a>
             </div>
             {/* Social Icons */}
-            <div className="flex items-center gap-2 min-w-[100px] sm:min-w-[120px]">
+            <div className="flex flex-nowrap items-center gap-0.5 sm:gap-1 md:gap-1.5 lg:gap-2 min-w-[70px] sm:min-w-[80px] md:min-w-[90px] lg:min-w-[100px]">
               <a
                 href="https://twitter.com"
                 target="_blank"
@@ -35,7 +35,7 @@ export default function Topbar() {
                 className="text-gray-200 hover:text-indigo-300 transition-colors duration-200"
                 aria-label="Twitter"
               >
-                <FaTwitter className="w-3 h-3 sm:w-4 sm:h-4" />
+                <FaTwitter className="w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
               </a>
               <a
                 href="https://facebook.com"
@@ -44,7 +44,7 @@ export default function Topbar() {
                 className="text-gray-200 hover:text-indigo-300 transition-colors duration-200"
                 aria-label="Facebook"
               >
-                <FaFacebookF className="w-3 h-3 sm:w-4 sm:h-4" />
+                <FaFacebookF className="w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
               </a>
               <a
                 href="https://instagram.com"
@@ -53,7 +53,7 @@ export default function Topbar() {
                 className="text-gray-200 hover:text-indigo-300 transition-colors duration-200"
                 aria-label="Instagram"
               >
-                <FaInstagram className="w-3 h-3 sm:w-4 sm:h-4" />
+                <FaInstagram className="w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
               </a>
               <a
                 href="https://linkedin.com"
@@ -62,7 +62,7 @@ export default function Topbar() {
                 className="text-gray-200 hover:text-indigo-300 transition-colors duration-200"
                 aria-label="LinkedIn"
               >
-                <FaLinkedinIn className="w-3 h-3 sm:w-4 sm:h-4" />
+                <FaLinkedinIn className="w-2 h-2 sm:w-2.5 md:w-3 lg:w-3.5 sm:h-2.5 md:h-3 lg:h-3.5" />
               </a>
             </div>
           </div>
