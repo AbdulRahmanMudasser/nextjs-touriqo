@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { Calendar, Search, User } from "lucide-react";
+import { Search, User } from "lucide-react";
+import { DateInput } from "@/components/ui/DateInput";
 
 export default function HeroContent() {
   const [isGuestsDropdownOpen, setIsGuestsDropdownOpen] = useState(false);
@@ -43,7 +42,6 @@ export default function HeroContent() {
     };
   }, []);
 
-  // Clear "Date To" if "Date From" changes to a later date
   useEffect(() => {
     if (selectedDateFrom && selectedDateTo && selectedDateTo < selectedDateFrom) {
       setSelectedDateTo(null);
@@ -87,7 +85,6 @@ export default function HeroContent() {
       children: String(guests.children),
     }).toString();
 
-    console.log("Navigating with query:", `/tourslist?${queryParams}`);
     router.push(`/tourslist?${queryParams}`);
   };
 
@@ -101,7 +98,7 @@ export default function HeroContent() {
       </p>
       <form onSubmit={(e) => e.preventDefault()} className="mt-6 sm:mt-8 w-full">
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 bg-[#F7F9FF] rounded-lg p-2 sm:p-3 shadow-md">
-          <div className="flex-1 w-full relative">
+          <div className="flex-1 w-full">
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
@@ -117,37 +114,26 @@ export default function HeroContent() {
               ))}
             </select>
           </div>
-          <div className="flex-1 w-full relative" ref={dateFromPickerRef}>
-            <div className="relative">
-              <DatePicker
-                selected={selectedDateFrom}
-                onChange={(date: Date | null) => setSelectedDateFrom(date)}
-                placeholderText="Check-in Date"
-                dateFormat="MMMM d, yyyy"
-                minDate={new Date()}
-                className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition pr-10"
-                wrapperClassName="w-full"
-                popperClassName="z-10 sm:max-w-[300px] w-[90vw] left-0 sm:left-auto"
-              />
-              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-[#9CA3AF]" />
-            </div>
+
+          <div className="flex-1 w-full" ref={dateFromPickerRef}>
+            <DateInput
+              selectedDate={selectedDateFrom}
+              onChange={setSelectedDateFrom}
+              placeholder="Check-in Date"
+              minDate={new Date()}
+            />
           </div>
-          <div className="flex-1 w-full relative" ref={dateToPickerRef}>
-            <div className="relative">
-              <DatePicker
-                selected={selectedDateTo}
-                onChange={(date: Date | null) => setSelectedDateTo(date)}
-                placeholderText="Check-out Date"
-                dateFormat="MMMM d, yyyy"
-                minDate={selectedDateFrom || new Date()}
-                className="w-full p-2 sm:p-3 rounded-lg border border-[#D1D5DB] bg-white text-sm sm:text-base text-[#1E2A44] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#D6DAFF] transition pr-10"
-                wrapperClassName="w-full"
-                popperClassName="z-10 sm:max-w-[300px] w-[90vw] left-0 sm:left-auto"
-                disabled={!selectedDateFrom}
-              />
-              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-[#9CA3AF]" />
-            </div>
+
+          <div className="flex-1 w-full" ref={dateToPickerRef}>
+            <DateInput
+              selectedDate={selectedDateTo}
+              onChange={setSelectedDateTo}
+              placeholder="Check-out Date"
+              minDate={selectedDateFrom || new Date()}
+              disabled={!selectedDateFrom}
+            />
           </div>
+
           <div className="flex-1 w-full relative" ref={guestsDropdownRef}>
             <button
               type="button"
@@ -163,9 +149,7 @@ export default function HeroContent() {
               <div className="absolute top-full left-0 w-full bg-white border border-[#D1D5DB] rounded-lg mt-1 z-10 p-2 shadow-lg">
                 {(["adult", "children"] as const).map((category) => (
                   <div key={category} className="flex justify-between items-center p-2">
-                    <span className="text-sm sm:text-base capitalize">
-                      {category}
-                    </span>
+                    <span className="text-sm sm:text-base capitalize">{category}</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -188,6 +172,7 @@ export default function HeroContent() {
               </div>
             )}
           </div>
+
           <div className="flex-1 w-full">
             <button
               type="button"

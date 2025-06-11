@@ -49,6 +49,11 @@ export default function TourHeader({
             e.currentTarget.src = "/default-hotel.jpg";
           }}
         />
+
+        <div className="hidden absolute top-4 left-4 bg-orange-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+          {id} Hotel Id
+        </div>
+
         {discount && (
           <div className="absolute top-4 left-4 bg-orange-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
             {discount}
