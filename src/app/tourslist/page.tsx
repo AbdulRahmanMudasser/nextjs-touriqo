@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { RefreshCw, Loader2 } from "lucide-react";
 import Topbar from "@/components/molecules/Topbar";
@@ -8,6 +8,15 @@ import { HeaderSection } from "../../components/organisms/Tourslistpage/HeaderSe
 import { ToursListMain } from "../../components/organisms/Tourslistpage/ToursListMainSection/ToursListMain";
 import { FooterSection } from "../../components/organisms/GlobalSections/FooterSection/FooterSection";
 import { Banner } from "@/components/molecules/Homepage/AdventureSection/Banner";
+
+// Define the Tour interface based on expected API response
+interface Tour {
+  id: string;
+  name: string;
+  price: number;
+  // Add other properties based on your API response
+  [key: string]: any; // Allow additional properties for flexibility
+}
 
 // Helper function for retryable fetch
 const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300) => {
@@ -29,7 +38,7 @@ const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, de
 
 export default function ToursList() {
   const searchParams = useSearchParams();
-  const [tours, setTours] = useState<any[]>([]);
+  const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +50,7 @@ export default function ToursList() {
     europe: { latitude: 54.5260, longitude: 15.2551 },
   };
 
-  const fetchTours = async () => {
+  const fetchTours = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -58,7 +67,9 @@ export default function ToursList() {
       return;
     }
 
-    const coordinates = (cityCoordinates as any)[city.toLowerCase()]; // Type assertion for cityCoordinates
+    const coordinates = (cityCoordinates as Record<string, { latitude: number; longitude: number }>)[
+      city.toLowerCase()
+    ];
     if (!coordinates) {
       console.error("Invalid city selection:", city);
       setError("Invalid city selection.");
@@ -114,10 +125,11 @@ export default function ToursList() {
         let errorDetails;
         try {
           errorDetails = await response.json();
-        } catch (e) {
+        } catch {
           errorDetails = { error: `HTTP error ${response.status}` };
         }
-        const errorMessage = errorDetails.error || errorDetails.details || `API request failed with status ${response.status}`;
+        const errorMessage =
+          errorDetails.error || errorDetails.details || `API request failed with status ${response.status}`;
         throw new Error(errorMessage);
       }
 
@@ -129,21 +141,21 @@ export default function ToursList() {
       }
 
       setTours(data.data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Fetch error details:", {
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error)?.message,
+        stack: (error as Error)?.stack,
       });
-      setError(error.message || "Request failed after multiple attempts");
+      setError((error as Error)?.message || "Request failed after multiple attempts");
       setTours([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams]); // Dependencies for fetchTours
 
   useEffect(() => {
     fetchTours();
-  }, [searchParams]);
+  }, [fetchTours]); // Depends on fetchTours memoized by useCallback
 
   const handleReload = () => {
     console.log("Retrying tour fetch...");
@@ -168,14 +180,13 @@ export default function ToursList() {
       ) : error ? (
         <div className="max-w-2xl mx-auto p-6 text-center bg-white rounded-xl shadow-lg border border-[#D6DAFF] my-8 transition-all duration-300 ease-in-out">
           <div className="flex flex-col items-center gap-4">
-            {/* Using a red-ish icon for error, consistent with common UI patterns */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-10 h-10 text-red-500 animate-pulse" // Added animate-pulse for a subtle effect
+              className="w-10 h-10 text-red-500 animate-pulse"
               aria-label="Error icon"
             >
               <path
