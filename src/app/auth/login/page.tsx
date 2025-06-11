@@ -12,6 +12,11 @@ type LoginFormData = {
   password: string;
 };
 
+// Define the expected response type for the login API
+interface LoginResponse {
+  token: string;
+}
+
 export default function Page() {
   const {
     register,
@@ -24,7 +29,7 @@ export default function Page() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const res = await axios.post("http://localhost:8000/api/login", data);
+      const res = await axios.post<LoginResponse>("http://localhost:8000/api/login", data);
       login(res.data.token);
       router.push("/");
     } catch {
