@@ -1,5 +1,4 @@
 "use client";
-import { Calendar, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import BookingForm from "./BookingForm";
 
@@ -109,10 +108,8 @@ export default function TourBooking({
             src="/images/tour.jpeg"
             alt="Beautiful tour destination with scenic landscapes"
             fill
-            className="object-cover"
-            fillpriority
-            className="object-fit rounded"
             priority
+            className="object-cover rounded"
           />
         </div>
 

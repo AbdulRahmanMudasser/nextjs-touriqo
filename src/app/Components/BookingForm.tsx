@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
+import { DateInput } from "@/components/ui/DateInput";
 
 interface BookingFormProps {
   id: string;
@@ -8,7 +9,7 @@ interface BookingFormProps {
 
 export default function BookingForm({ id }: BookingFormProps) {
   // Form state
-  const [startDate, setStartDate] = useState<string>("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
   const [timeSlot, setTimeSlot] = useState<string>("");
   const [ticketCount, setTicketCount] = useState<number>(1);
   const [serviceBooking, setServiceBooking] = useState<boolean>(false);
@@ -63,17 +64,15 @@ export default function BookingForm({ id }: BookingFormProps) {
               From:
             </label>
             <div className="relative">
-              <input
-                type="date"
-                id={`from-${id}`}
-                value={startDate}
-                onChange={(e) => {
-                  console.log("Date selected:", e.target.value);
-                  setStartDate(e.target.value);
+              <DateInput
+                selectedDate={startDate}
+                onChange={(date) => {
+                  console.log("Date selected:", date);
+                  setStartDate(date);
                   setError("");
                 }}
-                className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-[#A3BFFA] focus:border-[#A3BFFA] transition"
-                min={new Date().toISOString().split("T")[0]}
+                placeholder="Select tour start date"
+                minDate={new Date()}
                 aria-label="Select tour start date"
               />
             </div>
@@ -202,7 +201,7 @@ export default function BookingForm({ id }: BookingFormProps) {
               aria-label="Book tour"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-            Book Now
+              Book Now
             </button>
           </div>
         </form>
