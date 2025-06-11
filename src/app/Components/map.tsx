@@ -1,85 +1,84 @@
 "use client";
 import Head from "next/head";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 
-declare global {
-  interface Window {
-    google: typeof google;
-  }
-}
-
+// Declare the google namespace globally (will be used when Google Maps feature is restored)
+// declare global {
+//   interface Window {
+//     google: typeof google;
+//   }
+// }
 
 export default function Home() {
   const [modeOfTravel, setModeOfTravel] = useState("Walking");
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
+  // const googleMapRef = useRef<google.maps.Map | null>(null);
 
-  useEffect(() => {
-    const initMap = () => {
-      if (!window.google || !mapRef.current) return;
+  // Commenting out Google Maps logic temporarily
+  // useEffect(() => {
+  //   const initMap = () => {
+  //     if (!window.google || !mapRef.current) return;
 
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: 40.6915, lng: -74.0158 },
-        zoom: 12,
-      });
+  //     const map = new window.google.maps.Map(mapRef.current, {
+  //       center: { lat: 40.6915, lng: -74.0158 },
+  //       zoom: 12,
+  //     });
 
-      const marker = new window.google.maps.Marker({
-        position: { lat: 40.6915, lng: -74.0158 },
-        map: map,
-        title: "New Main Street, Brooklyn, NY",
-      });
+  //     const marker = new window.google.maps.Marker({
+  //       position: { lat: 40.6915, lng: -74.0158 },
+  //       map: map,
+  //       title: "New Main Street, Brooklyn, NY",
+  //     });
 
-      const infoWindow = new window.google.maps.InfoWindow({
-        content: `
-          <div class="flex items-center space-x-2">
-            <span class="text-sm font-medium">New Main Street, Brooklyn, NY</span>
-            <button onclick="this.parentElement.parentElement.style.display='none';" class="text-gray-500 hover:text-gray-700">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        `,
-      });
+  //     const infoWindow = new window.google.maps.InfoWindow({
+  //       content: `
+  //         <div class="flex items-center space-x-2">
+  //           <span class="text-sm font-medium">New Main Street, Brooklyn, NY</span>
+  //           <button onclick="this.parentElement.parentElement.style.display='none';" class="text-gray-500 hover:text-gray-700">
+  //             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  //               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  //             </svg>
+  //           </button>
+  //         </div>
+  //       `,
+  //     });
 
-      infoWindow.open(map, marker);
-      googleMapRef.current = map;
-    };
+  //     infoWindow.open(map, marker);
+  //     googleMapRef.current = map;
+  //   };
 
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        initMap();
-        return;
-      }
+  //   const loadGoogleMaps = () => {
+  //     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  //     if (!apiKey) {
+  //       console.error('Google Maps API key is missing. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your environment variables.');
+  //       return;
+  //     }
 
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => initMap();
-      document.head.appendChild(script);
-    };
+  //     if (window.google) {
+  //       initMap();
+  //       return;
+  //     }
 
-    if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
-      console.error('Google Maps API key is missing. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your environment variables.');
-      return;
-    }
+  //     const script = document.createElement("script");
+  //     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+  //     script.async = true;
+  //     script.defer = true;
+  //     script.onload = initMap;
+  //     document.head.appendChild(script);
+  //   };
 
-    loadGoogleMaps();
+  //   loadGoogleMaps();
 
-    return () => {
-      googleMapRef.current = null;
-    };
-  }, []);
+  //   return () => {
+  //     googleMapRef.current = null;
+  //   };
+  // }, []);
 
   return (
     <div className="min-h-screen bg-white flex ml-5 flex-col items-start p-4">
       <Head>
         <title>Location Map</title>
-        <link
-          href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-          rel="stylesheet"
-        />
+        {/* Note: Tailwind CSS should be included via global.css in a Next.js project, not a CDN */}
       </Head>
 
       <div className="w-full max-w-2xl bg-white rounded-lg shadow-md p-4">
@@ -115,7 +114,10 @@ export default function Home() {
         </div>
 
         <div className="relative w-full h-64 rounded-md overflow-hidden border-2 border-gray-300">
-          <div ref={mapRef} className="w-full h-full" style={{ display: 'block' }}></div>
+          <div ref={mapRef} className="w-full h-full" style={{ display: 'block' }}>
+            {/* Placeholder for map content - Google Maps logic is commented out */}
+            <p className="text-center text-gray-500">Map feature is temporarily disabled. Uncomment useEffect to restore.</p>
+          </div>
         </div>
 
         <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
