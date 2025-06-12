@@ -18,13 +18,24 @@ export default function HeroContent() {
   const router = useRouter();
   const totalGuests = guests.children + guests.adult;
 
-  const cityCoordinates = {
-    asia: { latitude: 34.0479, longitude: 100.6197 },
-    japan: { latitude: 35.6762, longitude: 139.6503 },
-    singapore: { latitude: 1.3521, longitude: 103.8198 },
-    thailand: { latitude: 13.7563, longitude: 100.5018 },
-    europe: { latitude: 54.5260, longitude: 15.2551 },
-  };
+  // Define list of cities worth visiting
+  const cities = [
+    "Seoul",
+    "Beijing",
+    "Dubai",
+    "Cairo",
+    "Luxor",
+    "Tokyo",
+    "Kyoto",
+    "Osaka",
+    "Singapore",
+    "Paris",
+    "Rome",
+    "Barcelona",
+    "Bangkok",
+    "Chiang Mai",
+    "Phuket",
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
@@ -107,9 +118,9 @@ export default function HeroContent() {
               <option value="" disabled>
                 Select City
               </option>
-              {Object.keys(cityCoordinates).map((city) => (
+              {cities.map((city) => (
                 <option key={city} value={city}>
-                  {city.charAt(0).toUpperCase() + city.slice(1)}
+                  {city}
                 </option>
               ))}
             </select>
