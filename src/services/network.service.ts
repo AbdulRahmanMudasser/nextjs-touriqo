@@ -1,41 +1,47 @@
-// services/networkService.ts
+import { AxiosResponse } from 'axios';
 
-import { apiService } from "./api.service";
+interface ErrorResponse {
+  message: string | string[];
+  code?: number;
+}
 
-const serialize = (obj: Record<string, any>): string =>
+interface SerializedObject {
+  [key: string]: string | number | boolean;
+}
+
+const serialize = (obj: SerializedObject): string =>
   Object.keys(obj)
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`)
-    .join("&");
+    .join('&');
 
-const handleResponse = async (
-  request: Promise<any>,
+const handleResponse = async <T>(
+  request: Promise<AxiosResponse<T>>,
   showError = true
-): Promise<any> => {
+): Promise<T> => {
   try {
     const response = await request;
-    return response.data.data || response.data || response;
-  } catch (error: any) {
-    const err = error.response?.data;
+    return response.data || response;
+  } catch (error: unknown) {
+    const err = (error as { response?: { data: ErrorResponse } })?.response?.data;
 
     if (showError && err?.message) {
       const errorMessage = Array.isArray(err.message)
-        ? err.message.join(", ")
+        ? err.message.join(', ')
         : err.message;
       alert(errorMessage);
     }
 
-    if (error.response?.code === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user_role");
-      window.location.href = "/";
+    if (err?.code === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_role');
+      window.location.href = '/';
     }
 
     throw err;
   }
 };
 
-// 🔄 Export higher-level API
 export const networkService = {
- 
   serialize,
+  handleResponse,
 };
