@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { RefreshCw, Loader2 } from "lucide-react";
 import Topbar from "@/components/molecules/Topbar";
@@ -14,16 +14,14 @@ interface Tour {
   id: string;
   name: string;
   price: number;
-  // Add other properties based on your API response
   [key: string]: unknown; // Allow additional properties for flexibility
 }
 
-// Define the CityCoordinates type
+// Define the Coordinates interface
 interface Coordinates {
   latitude: number;
   longitude: number;
 }
-type CityCoordinates = Record<string, Coordinates>;
 
 // Helper function for retryable fetch
 const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300): Promise<Response> => {
@@ -43,23 +41,46 @@ const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, de
   }
 };
 
+// Helper function to fetch coordinates from Nominatim API
+const fetchCoordinates = async (city: string): Promise<Coordinates | null> => {
+  try {
+    const response = await fetchWithRetry(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "HotelSearchApp/1.0 (contact: support@yourapp.com)", // Nominatim requires a User-Agent
+        },
+        cache: "force-cache", // Cache to reduce API calls
+      },
+      2 // Fewer retries for external API
+    );
+
+    if (!response.ok) {
+      throw new Error(`Nominatim API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data || !data[0]?.lat || !data[0]?.lon) {
+      throw new Error("No coordinates found for the city");
+    }
+
+    return {
+      latitude: parseFloat(data[0].lat),
+      longitude: parseFloat(data[0].lon),
+    };
+  } catch (error) {
+    console.error("Failed to fetch coordinates:", error);
+    return null;
+  }
+};
+
 export default function ToursList() {
   const searchParams = useSearchParams();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Memoize cityCoordinates to prevent recreation on every render
-  const cityCoordinates = useMemo<CityCoordinates>(
-    () => ({
-      asia: { latitude: 34.0479, longitude: 100.6197 },
-      japan: { latitude: 35.6762, longitude: 139.6503 },
-      singapore: { latitude: 1.3521, longitude: 103.8198 },
-      thailand: { latitude: 13.7563, longitude: 100.5018 },
-      europe: { latitude: 54.5260, longitude: 15.2551 },
-    }),
-    []
-  );
 
   const fetchTours = useCallback(async () => {
     setLoading(true);
@@ -78,10 +99,11 @@ export default function ToursList() {
       return;
     }
 
-    const coordinates = cityCoordinates[city.toLowerCase()];
+    // Fetch coordinates dynamically
+    const coordinates = await fetchCoordinates(city);
     if (!coordinates) {
       console.error("Invalid city selection:", city);
-      setError("Invalid city selection.");
+      setError("Unable to find coordinates for the selected city.");
       setLoading(false);
       return;
     }
@@ -160,7 +182,7 @@ export default function ToursList() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams, cityCoordinates]);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchTours();
