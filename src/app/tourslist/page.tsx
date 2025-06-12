@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { RefreshCw, Loader2 } from "lucide-react";
 import Topbar from "@/components/molecules/Topbar";
@@ -15,11 +15,18 @@ interface Tour {
   name: string;
   price: number;
   // Add other properties based on your API response
-  [key: string]: any; // Allow additional properties for flexibility
+  [key: string]: unknown; // Allow additional properties for flexibility
 }
 
+// Define the CityCoordinates type
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+type CityCoordinates = Record<string, Coordinates>;
+
 // Helper function for retryable fetch
-const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300) => {
+const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300): Promise<Response> => {
   try {
     const response = await fetch(url, options);
     if (response.ok) return response;
@@ -42,13 +49,17 @@ export default function ToursList() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cityCoordinates = {
-    asia: { latitude: 34.0479, longitude: 100.6197 },
-    japan: { latitude: 35.6762, longitude: 139.6503 },
-    singapore: { latitude: 1.3521, longitude: 103.8198 },
-    thailand: { latitude: 13.7563, longitude: 100.5018 },
-    europe: { latitude: 54.5260, longitude: 15.2551 },
-  };
+  // Memoize cityCoordinates to prevent recreation on every render
+  const cityCoordinates = useMemo<CityCoordinates>(
+    () => ({
+      asia: { latitude: 34.0479, longitude: 100.6197 },
+      japan: { latitude: 35.6762, longitude: 139.6503 },
+      singapore: { latitude: 1.3521, longitude: 103.8198 },
+      thailand: { latitude: 13.7563, longitude: 100.5018 },
+      europe: { latitude: 54.5260, longitude: 15.2551 },
+    }),
+    []
+  );
 
   const fetchTours = useCallback(async () => {
     setLoading(true);
@@ -67,9 +78,7 @@ export default function ToursList() {
       return;
     }
 
-    const coordinates = (cityCoordinates as Record<string, { latitude: number; longitude: number }>)[
-      city.toLowerCase()
-    ];
+    const coordinates = cityCoordinates[city.toLowerCase()];
     if (!coordinates) {
       console.error("Invalid city selection:", city);
       setError("Invalid city selection.");
@@ -151,11 +160,11 @@ export default function ToursList() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams]); // Dependencies for fetchTours
+  }, [searchParams, cityCoordinates]);
 
   useEffect(() => {
     fetchTours();
-  }, [fetchTours]); // Depends on fetchTours memoized by useCallback
+  }, [fetchTours]);
 
   const handleReload = () => {
     console.log("Retrying tour fetch...");
