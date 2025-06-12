@@ -1,8 +1,8 @@
 import React from 'react';
 import Img from '../Components/img';
-import Header from '../Components/header';
+// import Header from '../Components/header';
 import TourInformation from '../Components/tourInformation';
-import TourBooking from '../Components/tourBooking';
+// import TourBooking from '../Components/tourBooking';
 import TourPlan from '../Components/tourplan';
 import Map from '../Components/map';
 import Calender from '../Components/calender';
@@ -14,10 +14,10 @@ export default function Page() {
     <div className="font-sans">
       
       <Img />
-      <Header />
+      {/* <Header /> */}
   
       <TourInformation />
-      <TourBooking />
+      {/* <TourBooking /> */}
       <TourPlan />
       <Map />
     <Calender />

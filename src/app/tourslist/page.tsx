@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { RefreshCw, Loader2 } from "lucide-react";
 import Topbar from "@/components/molecules/Topbar";
@@ -9,8 +9,24 @@ import { ToursListMain } from "../../components/organisms/Tourslistpage/ToursLis
 import { FooterSection } from "../../components/organisms/GlobalSections/FooterSection/FooterSection";
 import { Banner } from "@/components/molecules/Homepage/AdventureSection/Banner";
 
+// Define the Tour interface based on expected API response
+interface Tour {
+  id: string;
+  name: string;
+  price: number;
+  // Add other properties based on your API response
+  [key: string]: unknown; // Allow additional properties for flexibility
+}
+
+// Define the CityCoordinates type
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+type CityCoordinates = Record<string, Coordinates>;
+
 // Helper function for retryable fetch
-const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300) => {
+const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 300): Promise<Response> => {
   try {
     const response = await fetch(url, options);
     if (response.ok) return response;
@@ -29,19 +45,23 @@ const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, de
 
 export default function ToursList() {
   const searchParams = useSearchParams();
-  const [tours, setTours] = useState<any[]>([]);
+  const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cityCoordinates = {
-    asia: { latitude: 34.0479, longitude: 100.6197 },
-    japan: { latitude: 35.6762, longitude: 139.6503 },
-    singapore: { latitude: 1.3521, longitude: 103.8198 },
-    thailand: { latitude: 13.7563, longitude: 100.5018 },
-    europe: { latitude: 54.5260, longitude: 15.2551 },
-  };
+  // Memoize cityCoordinates to prevent recreation on every render
+  const cityCoordinates = useMemo<CityCoordinates>(
+    () => ({
+      asia: { latitude: 34.0479, longitude: 100.6197 },
+      japan: { latitude: 35.6762, longitude: 139.6503 },
+      singapore: { latitude: 1.3521, longitude: 103.8198 },
+      thailand: { latitude: 13.7563, longitude: 100.5018 },
+      europe: { latitude: 54.5260, longitude: 15.2551 },
+    }),
+    []
+  );
 
-  const fetchTours = async () => {
+  const fetchTours = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -58,7 +78,7 @@ export default function ToursList() {
       return;
     }
 
-    const coordinates = (cityCoordinates as any)[city.toLowerCase()]; // Type assertion for cityCoordinates
+    const coordinates = cityCoordinates[city.toLowerCase()];
     if (!coordinates) {
       console.error("Invalid city selection:", city);
       setError("Invalid city selection.");
@@ -114,10 +134,11 @@ export default function ToursList() {
         let errorDetails;
         try {
           errorDetails = await response.json();
-        } catch (e) {
+        } catch {
           errorDetails = { error: `HTTP error ${response.status}` };
         }
-        const errorMessage = errorDetails.error || errorDetails.details || `API request failed with status ${response.status}`;
+        const errorMessage =
+          errorDetails.error || errorDetails.details || `API request failed with status ${response.status}`;
         throw new Error(errorMessage);
       }
 
@@ -129,21 +150,21 @@ export default function ToursList() {
       }
 
       setTours(data.data || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Fetch error details:", {
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error)?.message,
+        stack: (error as Error)?.stack,
       });
-      setError(error.message || "Request failed after multiple attempts");
+      setError((error as Error)?.message || "Request failed after multiple attempts");
       setTours([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams, cityCoordinates]);
 
   useEffect(() => {
     fetchTours();
-  }, [searchParams]);
+  }, [fetchTours]);
 
   const handleReload = () => {
     console.log("Retrying tour fetch...");
@@ -168,14 +189,13 @@ export default function ToursList() {
       ) : error ? (
         <div className="max-w-2xl mx-auto p-6 text-center bg-white rounded-xl shadow-lg border border-[#D6DAFF] my-8 transition-all duration-300 ease-in-out">
           <div className="flex flex-col items-center gap-4">
-            {/* Using a red-ish icon for error, consistent with common UI patterns */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-10 h-10 text-red-500 animate-pulse" // Added animate-pulse for a subtle effect
+              className="w-10 h-10 text-red-500 animate-pulse"
               aria-label="Error icon"
             >
               <path
